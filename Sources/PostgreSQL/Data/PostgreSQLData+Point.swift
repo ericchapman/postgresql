@@ -39,8 +39,8 @@ extension PostgreSQLPoint: PostgreSQLDataConvertible {
             assert(rightParen == ")")
             return .init(x: Double(x)!, y: Double(y)!)
         case .binary(let value):
-            let x = value[0..<8]
-            let y = value[8..<16]
+            let x = Data(bytes: value[0..<8].reversed())
+            let y = Data(bytes: value[8..<16].reversed())
             return .init(x: x.as(Double.self, default: 0), y: y.as(Double.self, default: 0))
         case .null: throw PostgreSQLError.decode(self, from: data)
         }
@@ -48,6 +48,6 @@ extension PostgreSQLPoint: PostgreSQLDataConvertible {
 
     /// See `PostgreSQLDataConvertible`.
     public func convertToPostgreSQLData() throws -> PostgreSQLData {
-        return PostgreSQLData(.point, binary: Data.of(x) + Data.of(y))
+        return PostgreSQLData(.point, binary: Data(bytes: Data.of(x).reversed()) + Data(bytes: Data.of(y).reversed()))
     }
 }
